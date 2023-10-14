@@ -85,3 +85,18 @@ class RSNet(BaseModel):
         x = self.prelu(self.decoder_conv9(x))
         x = self.decoder_conv10(x)
         return x
+
+class RefinementNet(BaseModel):
+    def __init__(self):
+        super().__init__()
+        self.prelu = nn.PReLU()
+        self.conv1 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
+        self.conv2 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
+        self.conv3 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
+
+    
+    def forward(self, x):
+        x = self.prelu(self.conv1(x))
+        x = self.prelu(self.conv2(x))
+        x = self.conv3(x)
+        return x
