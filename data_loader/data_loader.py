@@ -15,9 +15,8 @@ import cv2
 import numpy as np
 ### Data loader class that parses the CSV, abstraction of BaseDataLoader
 class ISTDLoader(BaseDataLoader):
-    def __init__(self, csv_file, root_dir, scale=2, transform=None):
+    def __init__(self, csv_file, root_dir, transform=None):
         super().__init__(csv_file=csv_file, root_dir=root_dir, transform=transform)
-        self.scale = scale
         print("[+] Data Loaded with rows: ", super().__len__())
 
     ### Get item returns an image for specific idx

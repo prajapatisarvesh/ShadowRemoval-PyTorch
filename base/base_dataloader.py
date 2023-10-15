@@ -24,7 +24,7 @@ class BaseDataLoader(DataLoader):
     Base class for data loaders
     """
     def __init__(self, csv_file, root_dir, transform=None):
-        self.csv_dataframe = pd.read_csv(os.path.join(root_dir, f'data/div2k/{csv_file}'))
+        self.csv_dataframe = pd.read_csv(os.path.join(root_dir, f'data/ISTD_Dataset/{csv_file}'))
         self.root_dir = root_dir
         self.transform = transform
     
