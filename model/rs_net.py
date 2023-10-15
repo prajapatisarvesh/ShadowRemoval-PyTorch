@@ -21,6 +21,7 @@ class RSNet(BaseModel):
         self.vgg16_pretrained = torchvision.models.vgg16 (pretrained = True)
         '''
         Replace ReLU with PReLU
+        Add Dropout after CONVs
         '''
         for x, feature in enumerate(self.vgg16_pretrained.features):
             if feature.__str__() == 'ReLU(inplace=True)':
@@ -39,9 +40,16 @@ class RSNet(BaseModel):
         '''
         add 1x1 conv
         '''
-        idx = 31
-        self.vgg16_pretrained.add_module(f'{idx}', nn.Conv2d(512, 512, kernel_size=(1,1), padding=(0,0)))
-        idx+=1
+        features_list = list(self.vgg16_pretrained[0])
+        new_features_list = []
+        for features in features_list:
+            new_features_list.append(features)
+            if isinstance(features, nn.Conv2d):
+                new_features_list.append(nn.Dropout(p=0.5, inplace=True))
+        new_features_list.append(nn.Conv2d(512, 512, kernel_size=(1,1), padding=(0,0)))
+        self.vgg16_pretrained[0] = nn.Sequential(*new_features_list)
+        # self.vgg16_pretrained.add_module(f'{idx}', )
+        # idx+=1
 
         '''
         ###############
@@ -50,6 +58,7 @@ class RSNet(BaseModel):
         Using model proposed by Zeiler
         '''
         self.prelu = nn.PReLU()
+        self.dropout = nn.Dropout()
         self.decoder_conv1 = nn.Conv2d(512, 512, kernel_size=(3,3), stride=(1,1), padding=(1,1))
         self.decoder_convt_1 = nn.ConvTranspose2d(512, 512, kernel_size=(2,2), stride=(1,1), padding=(0,0))
         self.decoder_conv2 = nn.Conv2d(512, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1))
@@ -68,20 +77,20 @@ class RSNet(BaseModel):
     
     def forward(self, x):
         x = self.vgg16_pretrained(x)
-        x = self.prelu(self.decoder_conv1(x))
+        x = self.prelu(self.dropout(self.decoder_conv1(x)))
         x = self.decoder_convt_1(x)
-        x = self.prelu(self.decoder_conv2(x))
+        x = self.prelu(self.dropout(self.decoder_conv2(x)))
         x = self.decoder_convt_2(x)
-        x = self.prelu(self.decoder_conv3(x))
-        x = self.prelu(self.decoder_conv4(x))
+        x = self.prelu(self.dropout(self.decoder_conv3(x)))
+        x = self.prelu(self.dropout(self.decoder_conv4(x)))
         x = self.decoder_convt_3(x)
-        x = self.prelu(self.decoder_conv5(x))
-        x = self.prelu(self.decoder_conv6(x))
+        x = self.prelu(self.dropout(self.decoder_conv5(x)))
+        x = self.prelu(self.dropout(self.decoder_conv6(x)))
         x = self.decoder_convt_4(x)
-        x = self.prelu(self.decoder_conv7(x))
+        x = self.prelu(self.dropout(self.decoder_conv7(x)))
         x = self.decoder_convt_5(x)
-        x = self.prelu(self.decoder_conv9(x))
-        x = self.decoder_conv9(x)
+        x = self.prelu(self.dropout(self.decoder_conv8(x)))
+        x = self.dropout(self.decoder_conv9(x))
         return x
 
 class RefinementNet(BaseModel):
