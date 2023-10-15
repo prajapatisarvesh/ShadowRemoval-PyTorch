@@ -60,11 +60,10 @@ class RSNet(BaseModel):
         self.decoder_conv5 = nn.Conv2d(128, 128, kernel_size=(3,3), stride=(1,1), padding=(1,1))
         self.decoder_conv6 = nn.Conv2d(128, 64, kernel_size=(3,3), stride=(1,1), padding=(1,1))
         self.decoder_convt_4 = nn.ConvTranspose2d(64, 64, kernel_size=(3,3), stride=(2,2), padding=(0,0))
-        self.decoder_conv7 = nn.Conv2d(64, 64, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_conv8 = nn.Conv2d(64, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
+        self.decoder_conv7 = nn.Conv2d(64, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
         self.decoder_convt_5 = nn.ConvTranspose2d(3, 3, kernel_size=(2,2), stride=(1,1), padding=(0,0))
+        self.decoder_conv8 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
         self.decoder_conv9 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_conv10 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
 
     
     def forward(self, x):
@@ -80,10 +79,9 @@ class RSNet(BaseModel):
         x = self.prelu(self.decoder_conv6(x))
         x = self.decoder_convt_4(x)
         x = self.prelu(self.decoder_conv7(x))
-        x = self.prelu(self.decoder_conv8(x))
         x = self.decoder_convt_5(x)
         x = self.prelu(self.decoder_conv9(x))
-        x = self.decoder_conv10(x)
+        x = self.decoder_conv9(x)
         return x
 
 class RefinementNet(BaseModel):
