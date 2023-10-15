@@ -44,8 +44,8 @@ class RSNet(BaseModel):
         new_features_list = []
         for features in features_list:
             new_features_list.append(features)
-            if isinstance(features, nn.PReLU):
-                new_features_list.append(nn.Dropout(p=0.5, inplace=True))
+            if isinstance(features, nn.Conv2d):
+                new_features_list.append(nn.Dropout(p=0.2, inplace=True))
         new_features_list.append(nn.Conv2d(512, 512, kernel_size=(1,1), padding=(0,0)))
         
         # self.vgg16_pretrained.add_module(f'{idx}', )
@@ -80,7 +80,7 @@ class RSNet(BaseModel):
             new_features_list.append(features)
             if isinstance(features, nn.Conv2d):
                 new_features_list.append(nn.PReLU())
-                new_features_list.append(nn.Dropout(p=0.5, inplace=True))
+                new_features_list.append(nn.Dropout(p=0.2, inplace=True))
         
         self.vgg16_pretrained[0] = nn.Sequential(*new_features_list)
 
