@@ -19,13 +19,17 @@ class RSNet(BaseModel):
         Using VGG-16 pretrained
         '''
         self.vgg16_pretrained = torchvision.models.vgg16 (pretrained = True)
+        self.vgg16_pretrained.requires_grad_ = False
         '''
         Replace ReLU with PReLU
         Add Dropout after CONVs
         '''
+        num_feat = 3
         for x, feature in enumerate(self.vgg16_pretrained.features):
+            if isinstance(feature, nn.Conv2d):
+                num_feat = feature.out_channels
             if feature.__str__() == 'ReLU(inplace=True)':
-                self.vgg16_pretrained.features[x] = nn.PReLU()
+                self.vgg16_pretrained.features[x] = nn.PReLU(num_parameters=num_feat)
         '''
         Modify Maxpooling to change stride to 1 for block 1,3 and 5
         '''
@@ -45,7 +49,7 @@ class RSNet(BaseModel):
         for features in features_list:
             new_features_list.append(features)
             if isinstance(features, nn.Conv2d):
-                new_features_list.append(nn.Dropout(p=0.2, inplace=True))
+                new_features_list.append(nn.Dropout(p=0.4, inplace=True))
         new_features_list.append(nn.Conv2d(512, 512, kernel_size=(1,1), padding=(0,0)))
         
         # self.vgg16_pretrained.add_module(f'{idx}', )
@@ -79,14 +83,14 @@ class RSNet(BaseModel):
         for features in features_list[encoder_len:-2]:
             new_features_list.append(features)
             if isinstance(features, nn.Conv2d):
-                new_features_list.append(nn.PReLU())
-                new_features_list.append(nn.Dropout(p=0.2, inplace=True))
+                new_features_list.append(nn.PReLU(num_parameters=features.out_channels))
+                new_features_list.append(nn.Dropout(p=0.4, inplace=True))
         
         self.vgg16_pretrained[0] = nn.Sequential(*new_features_list)
 
     def forward(self, x):
         x = self.vgg16_pretrained(x)
-        return x
+        return x.clip(min=0, max=1)
 
 class RefinementNet(BaseModel):
     def __init__(self):
@@ -101,4 +105,4 @@ class RefinementNet(BaseModel):
         x = self.prelu(self.conv1(x))
         x = self.prelu(self.conv2(x))
         x = self.conv3(x)
-        return x
+        return x.clip(min=0, max=1)

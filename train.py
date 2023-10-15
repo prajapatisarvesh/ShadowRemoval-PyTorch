@@ -13,7 +13,7 @@ if __name__ == '__main__':
     writer = SummaryWriter()
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     ### Number of Epochs
-    num_epochs = 20
+    num_epochs = 2000
     ### Number of Batch Size    
     batch_size = 4
     ### Learning Rate
@@ -23,19 +23,21 @@ if __name__ == '__main__':
     dataloader = DataLoader(train, batch_size=batch_size, shuffle=True)
     print(model)
     model.to(device=device)
+    # model.load_state_dict(torch.load('checkpoints/model_weight_rgb.pth'))
     criterion = CombinationLoss()
-    optimizer = torch.optim.Adagrad(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
     n_total_steps = len(dataloader)
     loss_counter = 0
     for epoch in range(num_epochs):
         epoch_loss = 0.0
         for i, data in enumerate(dataloader):
             shadow_image = data['shadow_image'].to(device)
-            shadow_image = shadow_image.permute(0,3,1,2)
+            shape_ = shadow_image.shape
+            shadow_image = shadow_image.view(shape_[0], shape_[3], shape_[1], shape_[2])
             shadow_mask_image = data['shadow_mask_image'].to(device)
-            shadow_mask_image = shadow_mask_image.permute(0,3,1,2)
+            shadow_mask_image = shadow_mask_image.view(shape_[0], shape_[3], shape_[1], shape_[2])
             shadow_free_image = data['shadow_free_image'].to(device)
-            shadow_free_image = shadow_free_image.permute(0,3,1,2)
+            shadow_free_image = shadow_free_image.view(shape_[0], shape_[3], shape_[1], shape_[2])
             output = model(shadow_image)
             loss = criterion(output, shadow_mask_image, shadow_free_image, shadow_image)
             loss_counter+=1
