@@ -22,13 +22,19 @@ class ISTDLoader(BaseDataLoader):
 
     ### Get item returns an image for specific idx
     def __getitem__(self, idx):
-        lr_image_name = self.csv_dataframe.iloc[idx, 0]
-        hr_image_name = self.csv_dataframe.iloc[idx, 1]
-        lr_image = cv2.imread(lr_image_name)
-        hr_image = cv2.imread(hr_image_name)
-        lr_image = lr_image.astype(dtype=np.float32) / 255
-        hr_image = hr_image.astype(dtype=np.float32) / 255
-        sample = {'lr_image':lr_image, 'hr_image': hr_image}
+        shadow = self.csv_dataframe.iloc[idx, 0]
+        shadow_mask = self.csv_dataframe.iloc[idx, 1]
+        shadow_free = self.csv_dataframe.iloc[idx, 2]
+        shadow_image = cv2.imread(shadow)
+        shadow_mask_image = cv2.imread(shadow_mask)
+        shadow_free_image = cv2.imread(shadow_free)
+        shadow_image = shadow_image.astype(dtype=np.float32) / 255
+        shadow_mask_image = shadow_mask_image.astype(dtype=np.float32) / 255
+        shadow_free_image = shadow_free_image.astype(dtype=np.float32) / 255
+        sample = {'shadow_image':shadow_image, 
+                  'shadow_mask_image': shadow_mask_image,
+                  'shadow_free_image': shadow_free_image,
+                  }
         if self.transform:
             sample = self.transform(sample)
         return sample
