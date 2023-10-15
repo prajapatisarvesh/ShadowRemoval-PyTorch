@@ -44,10 +44,10 @@ class RSNet(BaseModel):
         new_features_list = []
         for features in features_list:
             new_features_list.append(features)
-            if isinstance(features, nn.Conv2d):
+            if isinstance(features, nn.PReLU):
                 new_features_list.append(nn.Dropout(p=0.5, inplace=True))
         new_features_list.append(nn.Conv2d(512, 512, kernel_size=(1,1), padding=(0,0)))
-        self.vgg16_pretrained[0] = nn.Sequential(*new_features_list)
+        
         # self.vgg16_pretrained.add_module(f'{idx}', )
         # idx+=1
 
@@ -57,40 +57,35 @@ class RSNet(BaseModel):
         ###############
         Using model proposed by Zeiler
         '''
-        self.prelu = nn.PReLU()
-        self.dropout = nn.Dropout()
-        self.decoder_conv1 = nn.Conv2d(512, 512, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_convt_1 = nn.ConvTranspose2d(512, 512, kernel_size=(2,2), stride=(1,1), padding=(0,0))
-        self.decoder_conv2 = nn.Conv2d(512, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_convt_2 = nn.ConvTranspose2d(256, 256, kernel_size=(2,2), stride=(2,2), padding=(0,0))
-        self.decoder_conv3 = nn.Conv2d(256, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_conv4 = nn.Conv2d(256, 128, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_convt_3 = nn.ConvTranspose2d(128, 128, kernel_size=(2,2), stride=(1,1), padding=(0,0))
-        self.decoder_conv5 = nn.Conv2d(128, 128, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_conv6 = nn.Conv2d(128, 64, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_convt_4 = nn.ConvTranspose2d(64, 64, kernel_size=(3,3), stride=(2,2), padding=(0,0))
-        self.decoder_conv7 = nn.Conv2d(64, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_convt_5 = nn.ConvTranspose2d(3, 3, kernel_size=(2,2), stride=(1,1), padding=(0,0))
-        self.decoder_conv8 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
-        self.decoder_conv9 = nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1))
+        
+        features_list = new_features_list.copy()
+        encoder_len = len(features_list)
+        [features_list.append(a) for a in [
+        nn.Conv2d(512, 512, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.ConvTranspose2d(512, 512, kernel_size=(2,2), stride=(1,1), padding=(0,0)),
+        nn.Conv2d(512, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.ConvTranspose2d(256, 256, kernel_size=(2,2), stride=(2,2), padding=(0,0)),
+        nn.Conv2d(256, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.Conv2d(256, 128, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.ConvTranspose2d(128, 128, kernel_size=(2,2), stride=(1,1), padding=(0,0)),
+        nn.Conv2d(128, 128, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.Conv2d(128, 64, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.ConvTranspose2d(64, 64, kernel_size=(3,3), stride=(2,2), padding=(0,0)),
+        nn.Conv2d(64, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.ConvTranspose2d(3, 3, kernel_size=(2,2), stride=(1,1), padding=(0,0)),
+        nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        nn.Conv2d(3, 3, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+        ]]
+        for features in features_list[encoder_len:-2]:
+            new_features_list.append(features)
+            if isinstance(features, nn.Conv2d):
+                new_features_list.append(nn.PReLU())
+                new_features_list.append(nn.Dropout(p=0.5, inplace=True))
+        
+        self.vgg16_pretrained[0] = nn.Sequential(*new_features_list)
 
-    
     def forward(self, x):
         x = self.vgg16_pretrained(x)
-        x = self.prelu(self.dropout(self.decoder_conv1(x)))
-        x = self.decoder_convt_1(x)
-        x = self.prelu(self.dropout(self.decoder_conv2(x)))
-        x = self.decoder_convt_2(x)
-        x = self.prelu(self.dropout(self.decoder_conv3(x)))
-        x = self.prelu(self.dropout(self.decoder_conv4(x)))
-        x = self.decoder_convt_3(x)
-        x = self.prelu(self.dropout(self.decoder_conv5(x)))
-        x = self.prelu(self.dropout(self.decoder_conv6(x)))
-        x = self.decoder_convt_4(x)
-        x = self.prelu(self.dropout(self.decoder_conv7(x)))
-        x = self.decoder_convt_5(x)
-        x = self.prelu(self.dropout(self.decoder_conv8(x)))
-        x = self.dropout(self.decoder_conv9(x))
         return x
 
 class RefinementNet(BaseModel):
