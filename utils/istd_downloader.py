@@ -1,3 +1,13 @@
+'''
+LAST UPDATE: 2023.10.17
+Course: CS7180
+AUTHOR: Sarvesh Prajapati (SP), Abhinav Kumar (AK), Rupesh Pathak (RP)
+
+E-MAIL: prajapati.s@northeastern.edu, kumar.abhina@northeastern.edu, pathal.r@northeastern.edu
+DESCRIPTION: 
+Datadownloader
+
+'''
 import gdown
 import zipfile
 import os
@@ -5,12 +15,15 @@ import patoolib
 
 
 if __name__ == '__main__':
+    #file name
     file_name = 'istd.rar'
     download_link = 'https://drive.google.com/u/1/uc?id=1I0qw-65KBA6np8vIZzO6oeiOvcDBttAY'
     os.chdir('..')
+    # checks for file path
     if not os.path.exists('data'):
         os.mkdir('data')
     os.chdir('data')
+    # download dataset
     if not os.path.exists('ISTD_Dataset') and not os.path.exists(file_name):
         print("[+] ISTD Data Downloader")
         print("[+] Downloading ISTD.rar")
@@ -19,6 +32,7 @@ if __name__ == '__main__':
         print('[+] Cleanup')
         os.remove(file_name)
     os.chdir('ISTD_Dataset')
+    # create csv
     parent_dir = os.getcwd()
     main_folders = ['train', 'test']
     for folder in main_folders:

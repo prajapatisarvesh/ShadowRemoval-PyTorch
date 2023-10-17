@@ -1,8 +1,18 @@
+'''
+LAST UPDATE: 2023.10.17
+Course: CS7180
+AUTHOR: Sarvesh Prajapati (SP), Abhinav Kumar (AK), Rupesh Pathak (RP)
+
+E-MAIL: prajapati.s@northeastern.edu, kumar.abhina@northeastern.edu, pathal.r@northeastern.edu
+DESCRIPTION: 
+Loss for RSNEt
+
+'''
 from typing import Any
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-
+# alpha loss, mse loss based on target and output
 class AlphaLoss(object):
     def __init__(self):
         super().__init__()
@@ -11,7 +21,7 @@ class AlphaLoss(object):
     def __call__(self, output_mask, target_mask):
         return F.mse_loss(output_mask, target_mask)
 
-
+# composition loss between shadow image and generated shadow image
 class CompositionLoss(object):
     def __init__(self):
         super().__init__()
